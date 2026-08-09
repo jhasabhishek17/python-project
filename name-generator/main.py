@@ -1,7 +1,40 @@
+import random
 import tkinter as tk
 from tkinter import ttk, messagebox
 from tkinter.scrolledtext import ScrolledText
-import names
+
+try:
+    import names
+except ImportError:
+    _male_first_names = [
+        "Liam", "Noah", "Oliver", "Elijah", "James",
+        "William", "Benjamin", "Lucas", "Henry", "Alexander"
+    ]
+    _female_first_names = [
+        "Olivia", "Emma", "Ava", "Sophia", "Isabella",
+        "Charlotte", "Amelia", "Mia", "Harper", "Evelyn"
+    ]
+    _last_names = [
+        "Smith", "Johnson", "Williams", "Brown", "Jones",
+        "Garcia", "Miller", "Davis", "Rodriguez", "Martinez"
+    ]
+
+    class names:
+        @staticmethod
+        def get_first_name(gender=None):
+            if gender == "female":
+                return random.choice(_female_first_names)
+            if gender == "male":
+                return random.choice(_male_first_names)
+            return random.choice(_male_first_names + _female_first_names)
+
+        @staticmethod
+        def get_last_name():
+            return random.choice(_last_names)
+
+        @staticmethod
+        def get_full_name(gender=None):
+            return f"{names.get_first_name(gender=gender)} {names.get_last_name()}"
 
 
 class NameGeneratorApp:

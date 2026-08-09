@@ -1,3 +1,8 @@
+import os
+import sys
+import warnings
+warnings.filterwarnings("ignore")
+
 import tkinter as tk
 from tkinter import ttk, messagebox
 import webbrowser
@@ -16,11 +21,12 @@ class InstagramUserDetailsApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Instagram User Details")
-        self.root.geometry("520x620")
+        self.root.geometry("540x640")
         self.root.resizable(False, False)
         self.root.configure(bg="#0f172a")
 
         self.current_profile_pic = None
+        self.current_username = ""
 
         self.setup_ui()
 
@@ -156,11 +162,12 @@ class InstagramUserDetailsApp:
         self.open_web_btn.pack(side=tk.LEFT)
 
     def start_search(self):
-        username = self.user_entry.get().strip()
+        username = self.user_entry.get().strip().lstrip("@")
         if not username:
             messagebox.showwarning("Warning", "Please enter a valid Instagram username.")
             return
 
+        self.current_username = username
         self.search_btn.config(state=tk.DISABLED, text="Fetching...")
         self.status_label.config(text=f"Fetching details for @{username}...", fg="#38bdf8")
         self.pic_btn.config(state=tk.DISABLED)
@@ -206,7 +213,6 @@ class InstagramUserDetailsApp:
                     meta_image = re.search(r'<meta property="og:image" content="([^"]+)"', resp.text)
 
                     desc_text = meta_desc.group(1) if meta_desc else ""
-                    # e.g., "10M Followers, 500 Following, 1,200 Posts - ..."
                     followers = re.search(r'([\d\.\,KkMm]+)\s+Followers', desc_text)
                     following = re.search(r'([\d\.\,KkMm]+)\s+Following', desc_text)
                     posts = re.search(r'([\d\.\,KkMm]+)\s+Posts', desc_text)
@@ -265,6 +271,7 @@ class InstagramUserDetailsApp:
             err_text = f"Could not retrieve details for '@{username}'.\n\nReason: {error_msg or 'Profile not found or Instagram blocked request.'}"
             self.details_text.insert(tk.END, err_text)
             self.status_label.config(text="Error fetching user details", fg="#ef4444")
+            self.open_web_btn.config(state=tk.NORMAL)
 
         self.details_text.config(state=tk.DISABLED)
 
@@ -273,7 +280,7 @@ class InstagramUserDetailsApp:
             webbrowser.open(self.current_profile_pic)
 
     def open_profile_web(self):
-        if hasattr(self, 'current_username') and self.current_username:
+        if self.current_username:
             webbrowser.open(f"https://www.instagram.com/{self.current_username}/")
 
 

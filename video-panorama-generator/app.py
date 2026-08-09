@@ -1,6 +1,10 @@
+import os
+import sys
+import warnings
+warnings.filterwarnings("ignore")
+
 import cv2
 import numpy as np
-import os
 import logging
 import uuid
 from flask import Flask, request, render_template_string, send_from_directory
