@@ -496,14 +496,17 @@ def process_video_web():
         return render_template_string(HTML_TEMPLATE, error="No video file uploaded.")
 
     file = request.files["video"]
-    if file.filename == "":
+    if not file or file.filename == "":
         return render_template_string(HTML_TEMPLATE, error="Selected video file is empty.")
 
-    # Parse configurable parameters from form
+    # Parse configurable parameters from form safely
     mode = request.form.get("mode", "auto")
-    max_keyframes = int(request.form.get("max_keyframes", 8))
-    blur_thresh = float(request.form.get("blur_thresh", 40.0))
-    resolution = int(request.form.get("resolution", 1080))
+    try:
+        max_keyframes = int(request.form.get("max_keyframes", 8))
+        blur_thresh = float(request.form.get("blur_thresh", 40.0))
+        resolution = int(request.form.get("resolution", 1080))
+    except (ValueError, TypeError) as parse_err:
+        return render_template_string(HTML_TEMPLATE, error=f"Invalid parameter format: {parse_err}")
 
     # Save uploaded video with unique identifier to prevent collisions
     ext = os.path.splitext(file.filename)[1] or ".mp4"
@@ -521,10 +524,15 @@ def process_video_web():
             max_resolution=resolution
         )
 
+        if panorama_img is None or panorama_img.size == 0:
+            raise ValueError("Stitching pipeline produced an empty image.")
+
         # Save output panorama image
         output_filename = f"panorama_{uuid.uuid4().hex[:10]}.jpg"
         save_path = os.path.join(OUTPUT_FOLDER, output_filename)
-        cv2.imwrite(save_path, panorama_img)
+        saved = cv2.imwrite(save_path, panorama_img)
+        if not saved:
+            raise ValueError("Failed to save output panorama image file to disk.")
 
         # Clean up temporary uploaded video file
         if os.path.exists(video_path):
@@ -562,10 +570,16 @@ def api_process_video():
         return jsonify({"error": "Missing 'video' file parameter in request."}), 400
 
     file = request.files["video"]
+    if not file or file.filename == "":
+        return jsonify({"error": "Selected video file is empty."}), 400
+
     mode = request.form.get("mode", "auto")
-    max_keyframes = int(request.form.get("max_keyframes", 8))
-    blur_thresh = float(request.form.get("blur_thresh", 40.0))
-    resolution = int(request.form.get("resolution", 1080))
+    try:
+        max_keyframes = int(request.form.get("max_keyframes", 8))
+        blur_thresh = float(request.form.get("blur_thresh", 40.0))
+        resolution = int(request.form.get("resolution", 1080))
+    except (ValueError, TypeError) as parse_err:
+        return jsonify({"success": False, "error": f"Invalid parameter format: {parse_err}"}), 400
 
     ext = os.path.splitext(file.filename)[1] or ".mp4"
     video_path = os.path.join(UPLOAD_FOLDER, f"api_{uuid.uuid4().hex}{ext}")
@@ -581,9 +595,14 @@ def api_process_video():
             max_resolution=resolution
         )
 
+        if panorama_img is None or panorama_img.size == 0:
+            raise ValueError("Stitching pipeline produced an empty image.")
+
         output_filename = f"pano_api_{uuid.uuid4().hex[:10]}.jpg"
         save_path = os.path.join(OUTPUT_FOLDER, output_filename)
-        cv2.imwrite(save_path, panorama_img)
+        saved = cv2.imwrite(save_path, panorama_img)
+        if not saved:
+            raise ValueError("Failed to save output panorama image file to disk.")
 
         if os.path.exists(video_path):
             os.remove(video_path)

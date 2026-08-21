@@ -74,7 +74,10 @@ def filter_blur_and_select_keyframes(frames, max_keyframes=8, min_blur_score=50.
     prev_gray = None
 
     for idx, frame in enumerate(frames):
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        if frame.ndim == 2 or (frame.ndim == 3 and frame.shape[2] == 1):
+            gray = frame
+        else:
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         blur_score = compute_sharpness_score(gray)
 
         # Skip severely blurred frames unless min_blur_score threshold is zero
@@ -100,6 +103,8 @@ def filter_blur_and_select_keyframes(frames, max_keyframes=8, min_blur_score=50.
         scored_frames = [{'index': i, 'frame': f, 'blur_score': 100.0, 'motion_score': 1.0} for i, f in enumerate(frames)]
 
     # Limit keyframe selection based on spatial spread
+    if max_keyframes <= 0:
+        return []
     if len(scored_frames) <= max_keyframes:
         return [item['frame'] for item in scored_frames]
 
@@ -135,8 +140,12 @@ def blend_two_images_feather(img_left, img_right):
     blend_left = img_left[:, -overlap:].astype(np.float32)
     blend_right = img_right[:, :overlap].astype(np.float32)
 
-    # Construct linear alpha ramp: 0.0 -> 1.0
-    alpha = np.linspace(0.0, 1.0, overlap).reshape(1, overlap, 1)
+    # Construct linear alpha ramp matching image dimensions (2D vs 3D)
+    if img_left.ndim == 2:
+        alpha = np.linspace(0.0, 1.0, overlap).reshape(1, overlap)
+    else:
+        alpha = np.linspace(0.0, 1.0, overlap).reshape(1, overlap, 1)
+
     blended_middle = (1.0 - alpha) * blend_left + alpha * blend_right
 
     panorama = np.hstack([left_part, blended_middle.astype(np.uint8), right_part])
@@ -203,7 +212,8 @@ def crop_black_borders(image):
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _, thresh = cv2.threshold(gray, 1, 255, cv2.THRESH_BINARY)
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours = cnts[0] if len(cnts) == 2 else cnts[1]
 
     if contours:
         c = max(contours, key=cv2.contourArea)
@@ -267,6 +277,9 @@ def process_video_pipeline(video_path, sample_interval=10, max_keyframes=8, min_
 
     # Step 4: Crop black background borders
     final_panorama = crop_black_borders(stitched_result)
+    if final_panorama is None or final_panorama.size == 0:
+        raise ValueError("Panorama construction failed. Output image is empty.")
+
     elapsed_time = round(time.time() - start_time, 2)
 
     height, width = final_panorama.shape[:2]
