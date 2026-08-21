@@ -1,0 +1,12 @@
+{
+  "venvPath": ".",
+  "venv": ".venv",
+  "extraPaths": [
+    ".venv/lib/python3.9/site-packages",
+    "video-panorama-generator",
+    "instagram-user-details",
+    "name-generator",
+    "notepad-app"
+  ],
+  "reportMissingImports": "warning"
+}
