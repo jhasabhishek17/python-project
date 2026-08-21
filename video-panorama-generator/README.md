@@ -1,48 +1,153 @@
-# Video Panorama Generator
+# Video Panorama Generator Studio
 
-A Computer Vision web application built with Python, OpenCV, and Flask that converts uploaded video clips into seamless panoramic image visual summaries.
+A high-performance Computer Vision web application and REST API built with **Python**, **OpenCV**, and **Flask**. This system processes smooth video panning sequences (MP4, MOV, AVI) and synthesizes seamless high-resolution panoramic visual summaries.
 
-## How It Works
+---
 
-1. **Frame Extraction**: Reads incoming video streams and extracts frames at uniform interval samples.
-2. **Scene Change Detection**: Calculates absolute difference scores between adjacent frames to analyze camera motion and visual variance.
-3. **Keyframe Selection**: Sorts and selects optimal keyframe candidate images representing the entire video span.
-4. **Panoramic Image Stitching**:
-   - Uses OpenCV `Stitcher` to align, warp, and stitch keyframes into a continuous panorama.
-   - Includes a custom feather-blending algorithm as a fallback for low-overlap videos.
-5. **Interactive Web UI**: Built with Flask, featuring drag-and-drop uploads, progress indicators, preview displays, and download links.
+## 🌟 Key Features
 
-## Installation
+- **Automated Blur Rejection**: Evaluates frame sharpness via Laplacian variance operator (`cv2.Laplacian`) to discard blurry motion frames captured during fast panning.
+- **Dual-Mode Stitching Pipeline**:
+  - **Primary**: OpenCV `Stitcher` API (uses spherical/cylindrical camera models and multi-band blending).
+  - **Fallback**: Feature matching engine using **ORB/SIFT**, **RANSAC** homography estimation (`cv2.findHomography`), and **Linear Feather Gradient Blending** for seamless lighting cross-fades.
+- **Automatic ROI Border Trimming**: Detects black margins created by perspective transformations and crops the final output cleanly.
+- **Modern Web Dashboard**: Features custom dark UI styling, drag-and-drop video file upload, configurable quality controls, real-time status indicators, processing metrics, and image downloads.
+- **RESTful API**: JSON API endpoints (`/api/process`, `/api/health`) for programmatic video stitching integration.
 
-1. Navigate to the project directory:
-   ```bash
-   cd video-panorama-generator
-   ```
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+---
 
-## Usage
+## ⚙️ Computer Vision Architecture
 
-Start the web application:
+```
+                    ┌─────────────────────────┐
+                    │    Input Video Clip     │
+                    └────────────┬────────────┘
+                                 │
+                   ┌─────────────▼─────────────┐
+                   │ Frame Sampling & Downscale │
+                   └─────────────┬─────────────┘
+                                 │
+                   ┌─────────────▼─────────────┐
+                   │  Laplacian Blur Filtering │
+                   └─────────────┬─────────────┘
+                                 │
+                   ┌─────────────▼─────────────┐
+                   │ Spatial Keyframe Selection │
+                   └─────────────┬─────────────┘
+                                 │
+                ┌────────────────┴────────────────┐
+                ▼                                 ▼
+   ┌──────────────────────────┐     ┌──────────────────────────┐
+   │ OpenCV Stitcher Engine   │     │  Homography & Feature    │
+   │ (Multi-band / Spherical) │     │  Matching Engine (RANSAC)│
+   └────────────┬─────────────┘     └────────────┬─────────────┘
+                │                                 │
+                └────────────────┬────────────────┘
+                                 │
+                   ┌─────────────▼─────────────┐
+                   │ Automatic ROI Border Crop │
+                   └─────────────┬─────────────┘
+                                 │
+                   ┌─────────────▼─────────────┐
+                   │  High-Res Panorama Output │
+                   └───────────────────────────┘
+```
+
+---
+
+## 🚀 Quickstart & Installation
+
+### 1. Requirements
+
+Ensure you have Python 3.9+ installed on your system.
+
+### 2. Install Dependencies
+
+Navigate to the project directory and install required Python packages:
+
+```bash
+cd video-panorama-generator
+pip install -r requirements.txt
+```
+
+### 3. Run the Server
+
+Start the application using standard Python:
+
 ```bash
 python app.py
 ```
-Or run from the repository root:
+
+Or from the repository root:
+
 ```bash
-python python.py
+python video-panorama-generator/python.py
 ```
 
-Open your browser and navigate to:
+Open your web browser and navigate to:
 ```
 http://localhost:8080
 ```
 
-Upload a panning video clip (MP4, AVI, MOV), click **Generate Panorama**, and download the resulting high-resolution panoramic image.
+---
 
-## Dependencies
+## 📡 REST API Documentation
 
-- `flask`
-- `opencv-python`
-- `numpy`
+### 1. Health Check
+
+- **Endpoint**: `GET /api/health`
+- **Response**:
+```json
+{
+  "service": "video-panorama-generator",
+  "status": "healthy"
+}
+```
+
+### 2. Process Video API
+
+- **Endpoint**: `POST /api/process`
+- **Content-Type**: `multipart/form-data`
+- **Parameters**:
+  - `video` *(file, required)*: The target video file (.mp4, .mov, .avi).
+  - `mode` *(string, optional)*: `auto`, `opencv`, or `homography`. Default is `auto`.
+  - `max_keyframes` *(int, optional)*: Keyframe limit (e.g. `5`, `8`, `12`). Default is `8`.
+  - `blur_thresh` *(float, optional)*: Blur score threshold. Default is `40.0`.
+  - `resolution` *(int, optional)*: Processing max resolution height (e.g. `720`, `1080`, `1440`). Default is `1080`.
+
+- **Example Response**:
+```json
+{
+  "success": true,
+  "result_url": "/outputs/pano_api_a1b2c3d4e5.jpg",
+  "metrics": {
+    "total_video_frames": 240,
+    "sampled_frames": 30,
+    "selected_keyframes": 8,
+    "stitch_method": "opencv_stitcher",
+    "resolution": "3420x1080 px",
+    "processing_time_sec": 3.42
+  }
+}
+```
+
+---
+
+## 📂 Directory Structure
+
+```
+video-panorama-generator/
+├── app.py              # Flask web server, dashboard UI template, and API routes
+├── cv_engine.py        # Core Computer Vision pipeline & stitching logic
+├── python.py           # Launcher entrypoint script
+├── requirements.txt    # Project dependencies
+├── README.md           # Documentation
+├── uploads/            # Temporary directory for video uploads
+└── outputs/            # Output directory for generated panoramas
+```
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. Feel free to use and modify for academic or production applications.

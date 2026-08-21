@@ -1,1 +1,12 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Uploads and outputs (keep .gitkeep placeholder files)
+uploads/*
+!uploads/.gitkeep
+outputs/*
+!outputs/.gitkeep
+
+# System files
 .DS_Store
