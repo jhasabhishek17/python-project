@@ -2,6 +2,19 @@
 
 A clean, full-featured text editor application built with Python and Tkinter, featuring file operations, custom typography controls, live status statistics, and cross-platform keyboard shortcuts.
 
+![Notepad App UI Preview](assets/preview.jpg)
+
+---
+
+## 📸 How It Looks & Works
+
+1. **Text Editing Canvas**: Features line numbering on left margin, syntax highlighting, and smooth font rendering.
+2. **Typography Controls**: Choose font families (Courier New, Consolas, Segoe UI), font sizes, and styles on the fly.
+3. **Live Status Bar**: Shows current Line, Column position, word count, character count, and encoding format in real-time.
+4. **Shortcut Operations**: Fast keyboard shortcuts for file saving, opening, undo/redo, and inserting timestamps (`F5`).
+
+---
+
 ## Features
 
 - **File Operations**: Create New Document, Open text files, Save, Save As, and launch multiple application windows.

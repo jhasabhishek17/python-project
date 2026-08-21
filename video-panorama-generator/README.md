@@ -2,6 +2,22 @@
 
 A high-performance Computer Vision web application and REST API built with **Python**, **OpenCV**, and **Flask**. This system processes smooth video panning sequences (MP4, MOV, AVI) and synthesizes seamless high-resolution panoramic visual summaries.
 
+![Video Panorama Studio UI Preview](assets/preview.jpg)
+
+---
+
+## 📸 How It Looks & Works
+
+### 1. Web Dashboard Interface
+The application features a modern dark UI where users can drag and drop panning video clips, adjust keyframe sampling parameters, and execute the panorama synthesis pipeline.
+
+### 2. Processing & Visual Metrics
+Upon processing, real-time analytics show:
+- **Sampled Frames**: Total frames evaluated during motion analysis
+- **Selected Keyframes**: Non-blurry frames retained for stitching
+- **Output Resolution**: Synthesized panorama pixel dimensions (e.g. 3840x1080)
+- **Stitch Engine Used**: Primary OpenCV Multi-band or Fallback Homography Feather Blending
+
 ---
 
 ## 🌟 Key Features

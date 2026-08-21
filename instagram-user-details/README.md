@@ -2,6 +2,22 @@
 
 A modern Desktop Application built with Python and Tkinter for fetching and displaying public Instagram profile statistics and details in real-time.
 
+![Instagram User Fetcher UI Preview](assets/preview.jpg)
+
+---
+
+## 📸 How It Looks & Works
+
+1. **Enter Username**: Type any public handle (e.g. `@alexrivera_`) into the search bar.
+2. **Fetch Data**: Click **Fetch Details** (or press Enter) to query metrics asynchronously without freezing the app window.
+3. **Inspect Profile Card**:
+   - High-resolution circular profile picture / avatar.
+   - Verification badge indicator icon.
+   - Post Count, Follower Count, and Following Count stat boxes.
+   - Quick action buttons to view full-resolution avatar or open full profile on Instagram.
+
+---
+
 ## Features
 
 - **Profile Stats**: Retrieve follower count, following count, and post count.

@@ -2,6 +2,21 @@
 
 A Python Tkinter desktop application for generating random, realistic human names (first names, last names, and full names) based on gender and customizable quantity counts.
 
+![Random Name Generator UI Preview](assets/preview.jpg)
+
+---
+
+## 📸 How It Looks & Works
+
+1. **Configure Parameters**:
+   - **Gender**: Male, Female, or Any
+   - **Name Type**: Full Name, First Name, or Last Name
+   - **Quantity**: Set desired total names (1 to 50)
+2. **Generate Results**: Click **Generate Names** to render names instantly in the scrollable view box.
+3. **Copy to Clipboard**: Click **Copy to Clipboard** to copy the generated list directly for mock data testing or game development.
+
+---
+
 ## Features
 
 - **Gender Filtering**: Generate names specifically for Male, Female, or Random gender.

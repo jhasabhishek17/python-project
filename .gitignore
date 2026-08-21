@@ -21,5 +21,6 @@ video-panorama-generator/outputs/*
 !video-panorama-generator/outputs/.gitkeep
 uploads/
 outputs/
-*.jpg
-*.png
+# Allow documentation image assets in assets folders
+!**/assets/*.jpg
+!**/assets/*.png
